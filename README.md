@@ -31,6 +31,8 @@
 - 다만, 작은 코드 단위를 독립적으로 검증해야한다.
 - 이는 모듈화가 잘 되어있어야 함을 의미한다.
 
+- `핵심은 수동 테스트는 사람이 눈으로 확인하고, 자동화 테스트는 기계로 검증한다는 것이다.`
+
 ---
 
 ## CHAPTER 2 : 단위 테스트 자동화를 위한 Junit/AssertJ
@@ -118,4 +120,95 @@
 
 ---
 
+## CHAPTER 5 : TDD?
 
+### 5-1. RED
+
+- 실패하는 테스트 작성
+- 목표: 테스트에 given/when/then을 추가 후 테스트 목적을 분명히 한다.
+
+````java
+    public int calculateTotalPrice(){
+        return 0;
+    }
+````
+- 어처구니 없는 코드이다.
+- 그냥, "이런 API가 필요할 것이다!"라고 선언한다.
+- 이 단계는 구현이라 치지 않는다. 그냥 API만 명세한 것이다.
+
+````java
+@Test
+void calculateTotalPrice(){
+    CafeKiosk cafeKiosk = new CafeKiosk();
+    Americano americano = new Americano();
+    Latte latte = new Latte();
+
+    cafeKiosk.add(americano);
+    cafeKiosk.add(latte);
+
+    int totalPrice = cafeKiosk.calculateTotalPrice();
+
+    assertThat(totalPrice).isEqualTo(8500);
+}
+````
+
+- 총 가격을 계산하는 테스트이다.
+- 실패할 것을 예상하고 작성했다.
+
+### 5-2. GREEN
+
+- 테스트 통과위한 최소한의 코딩
+- 미리 짜놓은 테스트는 이 메서드의 목적이 된다.
+- 즉, 목적에 맞게(테스트 통과) 메서드를 작성한다.
+
+````java
+public int calculateTotalPrice(){
+    int totalPrice = 0;
+    for(Beverage beverage : beverages){
+        totalPrice += beverage.getPrice();
+    }
+    return totalPrice;
+}
+```` 
+
+### 5-3. REFACTOR
+
+- 구현 코드 개선
+````java
+    public int calculateTotalPrice(){
+        return beverages.stream()
+                .mapToInt(Beverage::getPrice)
+                .sum();
+    }
+````
+
+- 리팩터링 이후, 테스트를 돌려본다.
+
+### 5-4. 왜 테스트 작성 후 기능을 구현하는가?
+                         
+- 테스트로 많은 예외 케이스를 정의하고, 그에 맞춰 대응할 수 있게 한다.
+- 쉽게 발견하기 어려운 엣지 케이스를 놓치지 않을 수 있다.
+- 구현 후 테스트만 실행해 구현에 대한 빠른 피드백을 받을 수 있다.
+- 과감한 리팩토링이 가능해진다.(테스트만 잘 돌아가면 되기 때문)
+
+---
+
+## CHAPTER 6 : 테스트의 문서화(테스트 코드 깔끔하게)
+
+### 6-1. DisplayName
+
+초기 : `특정 시간 이전에 주문을 생성하면 실패한다.`
+
+변경 : `영업 시작 시간 이전에는 주문을 생성할 수 없다.`
+   
+=> 도메인에 맞춰서 작성할 것.
+
+### 6-2. BDD
+                 
+- 행위 주도 개발 : 사용자의 요구사항을 중심으로 개발 프로세스를 진행한다.
+
+#### GIVEN
+
+#### WHEN
+
+#### THEN

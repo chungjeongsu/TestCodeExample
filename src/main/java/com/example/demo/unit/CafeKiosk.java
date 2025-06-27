@@ -42,15 +42,6 @@ public class CafeKiosk {
         beverages.clear();
     }
 
-    public int calculateTotalPrice(){
-        int totalPrice = 0;
-        for (Beverage beverage : beverages) {
-            totalPrice += beverage.getPrice();
-        }
-        return totalPrice;
-    }
-
-
     /**
      * LocalDateTime을 의존하고 있는 createOrder
      * 테스트가 힘들다.
@@ -63,5 +54,11 @@ public class CafeKiosk {
         }
 
         return new Order(LocalDateTime.now(), beverages);
+    }
+
+    public int calculateTotalPrice(){
+        return beverages.stream()
+                .mapToInt(Beverage::getPrice)
+                .sum();
     }
 }
