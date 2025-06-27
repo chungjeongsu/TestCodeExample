@@ -1,4 +1,4 @@
-package com.example.demo.spring.domain.entity.product;
+package com.example.demo.spring.domain.product.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

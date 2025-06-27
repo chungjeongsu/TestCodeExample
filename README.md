@@ -221,4 +221,28 @@ public int calculateTotalPrice(){
 
 ---
 
-## CHAPTER 7 : Layer Architecture
+````java
+    @DisplayName("주문 목록에 담긴 상품들의 총 금액을 계산할 수 있다.")
+    @Test
+    void calculateTotalPrice(){
+        // given
+        CafeKiosk cafeKiosk = new CafeKiosk();
+        Americano americano = new Americano();  //4000원
+        Latte latte = new Latte();              //4500원
+
+        cafeKiosk.add(americano);
+        cafeKiosk.add(latte);
+
+        //when
+        int totalPrice = cafeKiosk.calculateTotalPrice();
+
+        //then
+        assertThat(totalPrice).isEqualTo(8500);
+    }
+````
+
+## CHAPTER 7 : 테스트를 위한 Layer Architecture
+
+---
+
+## CHAPTER 8 : Infra-Structure 레이어 테스트 방법
