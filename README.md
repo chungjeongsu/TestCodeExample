@@ -209,6 +209,16 @@ public int calculateTotalPrice(){
 
 #### GIVEN
 
+- 테스트 준비(시나리오 시작 이니셜라이즈)
+
 #### WHEN
 
+- 비즈니스 로직(단위) 실행
+
 #### THEN
+
+- 기댓값 비교
+
+---
+
+## CHAPTER 7 : Layer Architecture
