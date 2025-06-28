@@ -6,6 +6,7 @@ import static com.example.demo.spring.domain.product.entity.ProductSellingStatus
 
 import com.example.demo.spring.business.order.dto.OrderCreateReq;
 import com.example.demo.spring.business.order.dto.OrderCreateRes;
+import com.example.demo.spring.domain.product.ProductManager;
 import com.example.demo.spring.domain.product.entity.Product;
 import com.example.demo.spring.domain.product.entity.ProductType;
 import com.example.demo.spring.infra.jpa.product.ProductRepository;
@@ -23,11 +24,11 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("test")
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.yml")
-class OrderServiceTest {
+class ProductManagerTest {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
-    private OrderService orderService;
+    private ProductManager productManager;
 
     @DisplayName("주문번호 리스트를 받아 주문을 생성한다.")
     @Test
@@ -63,7 +64,7 @@ class OrderServiceTest {
                 .build();
 
         //when
-        OrderCreateRes orderCreateRes = orderService.createOrder(req);
+        OrderCreateRes orderCreateRes = (req);
 
         //then
         Assertions.assertThat(orderCreateRes.getId()).isNotNull();

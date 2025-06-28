@@ -15,4 +15,8 @@ public class ProductManager {
     public List<Product> findAllBySellingStatus() {
         return productRepository.findAllBySellingStatusIn(ProductSellingStatus.forDisplay());
     }
+
+    public List<Product> findAllByProductNumber(List<String> productNumbers) {
+        return productRepository.findAllByProductNumberIn(productNumbers);
+    }
 }
