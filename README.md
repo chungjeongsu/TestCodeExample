@@ -1,6 +1,10 @@
 # 테스트코드 예제
 ## 간단한 카페 키오스크
 
+### 시작하기에 앞서
+
+
+
 ---
 
 ### 1. 주문 목록에 음료 추가, 삭제 기능
@@ -37,13 +41,31 @@
 
 ## CHAPTER 2 : 단위 테스트 자동화를 위한 Junit/AssertJ
 
+- **우리는 2가지의 테스트 유형을 정의할 수 있다.**
+
 ### happy case
 
 - 기능이 잘 되는가?
 
 ### exception case
 
-- 기능에서 발생할 수 있는 예외가 처리되었는가?
+- 기능에서 발생할 수 있는 예외를 제대로 던지는가?
+
+### AssertJ
+
+````
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	testImplementation 'org.assertj:assertj-core:3.23.1'
+````
+
+- 위는 assertJ의 의존성이다. 추가해주자.
+
+![img.png](img.png)
+
+- 위와 같이 2개의 Assertions가 보일 수 있는데, 아래가 assertJ이다.
+- assertJ는 아래와 같이 테스트를 위해, chain 형태의 메서드들을 제공한다.
+
+=> 그냥 테스트를 쉽고, 명확히 하기 위한 라이브러리라고 생각하자.
 
 ---
 
@@ -114,13 +136,18 @@
 
 ### 4-3. 해결책
 
-- 그냥 외부로 분리하자.
+- 그냥 외부로 분리하자.(통신만하는 클래스를 만들라는 뜻이다.)
+- Input, Output, 기능(통신)을 책임지는 클래스(모듈)을 만들 수 있다.
+
+
 - 그 값을 받아서 사용하는 모듈은 그냥 객체를 만들어 테스트한다.
 - 만약, 외부 API 응답도 테스트가 필요하다면, 찾아서 그 모듈만 테스트한다.
 
 ---
 
 ## CHAPTER 5 : TDD?
+
+- 아래는 TDD의 진행 순서이다.
 
 ### 5-1. RED
 
@@ -214,6 +241,7 @@ public int calculateTotalPrice(){
 #### WHEN
 
 - 비즈니스 로직(단위) 실행
+- 테스트의 주체이다. "이 메서드를 실행하는 것을 테스트하겠다!" 이뜻임.
 
 #### THEN
 
@@ -245,4 +273,96 @@ public int calculateTotalPrice(){
 
 ---
 
-## CHAPTER 8 : Infra-Structure 레이어 테스트 방법
+## CHAPTER 8 : Infra-Structure 레이어 테스트
+
+### `외부 API나 DB와의 통신이 제대로 되는지 확인한다.`
+
+````java
+    @DisplayName("원하는 판매상태를 가진 상품들을 조회한다.")
+    @Test
+    void findAllBySellingStatusIn(){
+        //given
+        Product product1 = Product.builder()
+                .productNumber("001")
+                .type(ProductType.HANDMADE)
+                .sellingStatus(SELLING)
+                .name("아메리카노")
+                .price(4000)
+                .build();
+
+        Product product2 = Product.builder()
+                .productNumber("002")
+                .type(ProductType.HANDMADE)
+                .sellingStatus(HOLD)
+                .name("카페라때")
+                .price(4000)
+                .build();
+
+        Product product3 = Product.builder()
+                .productNumber("003")
+                .type(ProductType.HANDMADE)
+                .sellingStatus(STOP_SELLING)
+                .name("팥빙수")
+                .price(7000)
+                .build();
+        productRepository.saveAll(List.of(product1, product2, product3));
+
+        //when
+        List<Product> products = productRepository.findAllBySellingStatusIn(List.of(SELLING, HOLD));
+
+        //then
+        Assertions.assertThat(products).hasSize(2)
+                .extracting("productNumber", "name", "sellingStatus")
+                .containsExactlyInAnyOrder(
+                        Tuple.tuple("001", "아메리카노", SELLING),
+                        Tuple.tuple("002", "카페라때", HOLD));
+    }
+````
+
+- 상품 엔티티를 직접 만들고, INSERT 후 SELECT 해오는 테스트이다.
+- 즉, Infra-Structure 레이어는 "외부 API와 잘 통신을 하는가?"를 확인하면 된다.
+- `예외가 발생한다면, 와이어 샤크나, 세션 체크 등으로 문제를 해결하자.`
+
+
+- 아래는 yml이다.
+
+````
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=MYSQL;
+    username: sa
+    password:
+  jpa:
+    properties:
+      hibernate:
+        show-sql: true
+        format-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      mode: never
+      data-locations:
+        - classpath:product-insert.sql
+````
+
+---
+
+## CHAPTER 9 : DOMAIN 레이어 테스트
+
+### Domain의 로직은 Entity(JPA)나 VO(외부 API)를 받아온다.
+- 다른 가공하는 로직은 business 레이어가 책임지기에, 여기서는 가공하지 않는다.
+- 만약, 하나의 커넥션(트랜잭션)에 여러 값을 가져와야한다면, VO를 만들어주자.
+- 트랜잭션의 범위 설정 또한 business 레이어의 책임이기에, Domain 로직은 오로지 순수 자바 코드만 들어간다.
+
+
+
